@@ -3,25 +3,31 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.IO;
 
 public class MainManager : MonoBehaviour
 {
-    public Brick BrickPrefab;
+
+    private int m_Points;
     public int LineCount = 6;
+
+    public Brick BrickPrefab;    
     public Rigidbody Ball;
 
-    public Text ScoreText;
+    public Text ScoreText;    
     public GameObject GameOverText;
-    
-    private bool m_Started = false;
-    private int m_Points;
-    
+    public Text BestScoreText;
+
+    private bool m_Started = false;    
     private bool m_GameOver = false;
 
     
     // Start is called before the first frame update
     void Start()
     {
+        ScoreText.text = "Player: " +SessionData.Instance.currentPlayerName + " - Score: "; 
+
+        SetBestScoreText(SessionData.Instance.playerName, SessionData.Instance.highScore);
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
         
@@ -64,8 +70,14 @@ public class MainManager : MonoBehaviour
 
     void AddPoint(int point)
     {
+
         m_Points += point;
-        ScoreText.text = $"Score : {m_Points}";
+        //string name = SessionData.Instance.playerName;
+        //ScoreText.text = $"Score : {m_Points}";
+
+        ScoreText.text = "Player: " + SessionData.Instance.currentPlayerName + " - Score: " + m_Points;
+
+        CheckHighScore();
     }
 
     public void GameOver()
@@ -73,4 +85,22 @@ public class MainManager : MonoBehaviour
         m_GameOver = true;
         GameOverText.SetActive(true);
     }
+
+    void CheckHighScore()
+    {
+        if (m_Points > SessionData.Instance.highScore)
+        {
+            SessionData.Instance.playerName = SessionData.Instance.currentPlayerName;
+            SessionData.Instance.highScore = m_Points;
+            SessionData.Instance.SavePlayerData();
+            SetBestScoreText(SessionData.Instance.playerName, SessionData.Instance.highScore);
+        }
+    }
+
+    void SetBestScoreText(string name, int points)
+    {
+        BestScoreText.text = "Best score: " + name + " : " + points;
+    }
+
+
 }
